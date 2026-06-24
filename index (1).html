@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="MT Belts"/>
+<meta name="theme-color" content="#e8a020"/>
+<meta name="description" content="Musaddique Traders — Belt Stock aur Billing Manager"/>
+<title>Musaddique Traders — Belt Stock Manager</title>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="apple-touch-icon" href="./icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --card: #1e2333;
+    --border: #2a3045;
+    --accent: #e8a020;
+    --accent2: #c0760f;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --low: #ff6b35;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: #000;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+
+  .logo-text h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.3px;
+  }
+
+  .logo-text p {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .header-date {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* NAV TABS */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+  }
+
+  nav button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  nav button:hover:not(.active) { color: var(--text); }
+
+  /* MAIN */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* SECTION HEADER */
+  .sec-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  /* STAT ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-card .value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .stat-card.low .value { color: var(--low); }
+  .stat-card.ok .value { color: var(--green); }
+  .stat-card.gold .value { color: var(--accent); }
+
+  /* FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; }
+
+  input, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  input:focus, select:focus { border-color: var(--accent); }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #ffb733; }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-green { background: var(--green); color: #000; }
+  .btn-green:hover { background: #16a34a; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--bg);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(232,160,32,0.04); }
+
+  tbody td {
+    padding: 11px 14px;
+    vertical-align: middle;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-B { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .badge-C { background: rgba(168,85,247,0.15); color: #c084fc; }
+  .badge-low { background: rgba(239,68,68,0.15); color: var(--low); }
+  .badge-ok { background: rgba(34,197,94,0.15); color: var(--green); }
+
+  /* ALERT BOX */
+  .alert {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #fca5a5;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+
+  /* PRICE MANAGER */
+  .price-table {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .price-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .price-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .price-row .pr-label { font-size: 12px; color: var(--muted); width: 160px; flex-shrink: 0; }
+
+  .price-row .pr-input {
+    width: 110px !important;
+    min-width: 110px !important;
+    flex-shrink: 0;
+    background: var(--surface) !important;
+    border: 1.5px solid var(--accent) !important;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+  }
+
+  .price-row .pr-input:focus {
+    border-color: #ffb733 !important;
+    box-shadow: 0 0 0 3px rgba(232,160,32,0.2);
+  }
+
+  .price-row .pr-unit { font-size: 12px; color: var(--muted); }
+
+  /* BILL */
+  .bill-items { margin-bottom: 14px; }
+
+  .bill-item-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 80px 40px;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 10px;
+  }
+
+  .bill-total {
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: right;
+  }
+
+  .bill-total .total-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  /* PRINT BILL */
+  .print-bill {
+    background: #fff;
+    color: #111;
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 500px;
+    margin: 0 auto;
+    font-size: 13px;
+  }
+
+  .print-bill .pb-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 2px solid #e8a020;
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+
+  .print-bill .pb-logo {
+    width: 46px; height: 46px;
+    background: linear-gradient(135deg, #e8a020, #c0760f);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 17px; color: #000;
+  }
+
+  .print-bill h2 { font-size: 18px; font-weight: 800; color: #e8a020; }
+  .print-bill .pb-sub { font-size: 11px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+
+  .print-bill table { width: 100%; border-collapse: collapse; }
+  .print-bill th { background: #f3f4f6; padding: 8px 10px; font-size: 11px; text-align: left; }
+  .print-bill td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+  .print-bill .pb-total { text-align: right; margin-top: 14px; font-size: 16px; font-weight: 700; color: #e8a020; }
+
+  /* TABS CONTENT */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* WEEKLY REPORT */
+  .report-section { margin-bottom: 20px; }
+  .report-section h3 { font-size: 14px; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .close-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; cursor: pointer; line-height: 1;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .bill-item-row { grid-template-columns: 1fr 1fr 60px 30px; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">MT</div>
+    <div class="logo-text">
+      <h1>Musaddique Traders</h1>
+      <p>Belt Stock Manager</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div class="header-date" id="hdate"></div>
+    <span id="sync-status" style="font-size:11px;color:var(--muted);">☁️ Connecting...</span>
+    <button onclick="syncFromCloud()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;">🔄 Sync</button>
+    <button id="install-btn" onclick="installApp()" style="display:none;align-items:center;gap:6px;background:var(--accent);color:#000;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
+      📲 Install App
+    </button>
+    <button onclick="manualSync()" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+      🔄 Sync
+    </button>
+    <span id="sync-status" style="font-size:11px;color:var(--muted);white-space:nowrap;"></span>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('dashboard')">📊 Dashboard</button>
+  <button onclick="showTab('stock')">📦 Stock</button>
+  <button onclick="showTab('billing')">🧾 Billing</button>
+  <button onclick="showTab('prices')">💰 Prices</button>
+  <button onclick="showTab('report')">📋 Weekly Report</button>
+</nav>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="sec-title">Dashboard</div>
+    <div class="stats-row" id="stats-row"></div>
+    <div id="low-alerts"></div>
+    <div class="card">
+      <div class="card-title">All Stock — Quick View</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Belt Code</th>
+              <th>Section</th>
+              <th>Size (inch)</th>
+              <th>Qty</th>
+              <th>Status</th>
+              <th>Value (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="dash-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK -->
+  <div class="tab-content" id="tab-stock">
+    <div class="sec-title">Stock Management</div>
+
+    <div class="card">
+      <div class="card-title">Add / Update Stock</div>
+      <div class="form-grid">
+        <div>
+          <label>Section</label>
+          <select id="s-section">
+            <option value="B">B Section</option>
+            <option value="C">C Section</option>
+          </select>
+        </div>
+        <div>
+          <label>Belt Size (inches)</label>
+          <input type="number" id="s-size" placeholder="e.g. 132" min="1"/>
+        </div>
+        <div>
+          <label>Quantity</label>
+          <input type="number" id="s-qty" placeholder="e.g. 10" min="0"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addStock()">+ Add to Stock</button>
+        <button class="btn btn-outline" onclick="setStock()">Set Exact Qty</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Deduct from Stock (Sale)</div>
+      <div class="form-grid">
+        <div>
+          <label>Belt Code</label>
+          <input type="text" id="d-code" placeholder="e.g. B132" oninput="this.value=this.value.toUpperCase()"/>
+        </div>
+        <div>
+          <label>Quantity to Deduct</label>
+          <input type="number" id="d-qty" placeholder="e.g. 2" min="1"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-danger" onclick="deductStock()">- Deduct Stock</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Full Stock List</div>
+      <div style="margin-bottom:10px; display:flex; gap:10px; align-items:center;">
+        <input type="text" id="search-input" placeholder="Search belt code..." style="max-width:200px;" oninput="renderStockTable()"/>
+        <select id="filter-section" onchange="renderStockTable()" style="max-width:150px;">
+          <option value="">All Sections</option>
+          <option value="B">B Section</option>
+          <option value="C">C Section</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Belt Code</th>
+              <th>Section</th>
+              <th>Size (in)</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="stock-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BILLING -->
+  <div class="tab-content" id="tab-billing">
+    <div class="sec-title">Bill Banana</div>
+
+    <div class="card">
+      <div class="card-title">Customer Details</div>
+      <div class="form-grid">
+        <div>
+          <label>Customer Name</label>
+          <input type="text" id="cust-name" placeholder="Customer ka naam"/>
+        </div>
+        <div>
+          <label>Bill No.</label>
+          <input type="text" id="bill-no" placeholder="Auto"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Belt Items Add Karo</div>
+      <div class="bill-items" id="bill-items"></div>
+      <button class="btn btn-outline" onclick="addBillItem()">+ Add Belt</button>
+    </div>
+
+    <div class="bill-total">
+      <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">Total Amount</div>
+      <div class="total-val" id="bill-total-val">₹0.00</div>
+    </div>
+
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="generateBill()">Generate Bill</button>
+      <button class="btn btn-outline" onclick="clearBill()">Clear</button>
+    </div>
+  </div>
+
+  <!-- PRICES -->
+  <div class="tab-content" id="tab-prices">
+    <div class="sec-title">Price Manager</div>
+    <div class="card">
+      <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+        Prices kabhi bhi yahan se update karo — bill automatically new prices se calculate hoga.
+      </p>
+      <div class="price-table" id="price-cards"></div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="savePrices()">💾 Save Prices</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:4px;">
+      <div class="card-title">Price History</div>
+      <div id="price-history-list" style="font-size:13px; color:var(--muted);"></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY REPORT -->
+  <div class="tab-content" id="tab-report">
+    <div class="sec-title">Weekly Report</div>
+    <div class="card">
+      <div id="weekly-report-content"></div>
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report</button>
+        <button class="btn btn-outline" onclick="generateReport()">🔄 Refresh</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- BILL MODAL -->
+<div class="modal-overlay hidden" id="bill-modal">
+  <div class="modal">
+    <div class="modal-title">
+      Bill Preview
+      <button class="close-btn" onclick="closeBillModal()">✕</button>
+    </div>
+    <div id="bill-preview"></div>
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="btn btn-primary" onclick="printBill()">🖨️ Print Bill</button>
+      <button class="btn btn-outline" id="save-img-btn" onclick="saveBillAsImage()">🖼️ Save as Image</button>
+      <button class="btn btn-green" id="confirm-deduct-btn" onclick="confirmBillDeduct()">✅ Confirm & Deduct Stock</button>
+      <button class="btn btn-outline" onclick="closeBillAndClear()">✖ Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MSG TOAST -->
+<div id="toast" style="position:fixed;bottom:24px;right:24px;background:var(--green);color:#000;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;display:none;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,0.4);"></div>
+
+<script>
+// =============== DATA ===============
+const LOW_LIMIT = 4;
+
+function getData() {
+  return JSON.parse(localStorage.getItem('mt_stock') || '{}');
+}
+function saveData(d) {
+  localStorage.setItem('mt_stock', JSON.stringify(d));
+  // Auto push to Google Sheets
+  try { pushStockToCloud(); } catch(e) {}
+}
+
+function getPrices() {
+  return JSON.parse(localStorage.getItem('mt_prices') || JSON.stringify({
+    B: [{ label: 'B1–B99 (upto 99 inch)', maxInch: 99, rate: 2.5 }, { label: 'B100+ (100 inch & above)', maxInch: 9999, rate: 2.8 }],
+    C: [{ label: 'C1–C100 (upto 100 inch)', maxInch: 100, rate: 3.2 }, { label: 'C101+ (101 inch & above)', maxInch: 9999, rate: 3.5 }]
+  }));
+}
+
+function savePriceData(p) {
+  localStorage.setItem('mt_prices', JSON.stringify(p));
+  // save history
+  let hist = JSON.parse(localStorage.getItem('mt_price_hist') || '[]');
+  hist.unshift({ date: new Date().toLocaleString('en-IN'), prices: JSON.parse(JSON.stringify(p)) });
+  hist = hist.slice(0, 10);
+  localStorage.setItem('mt_price_hist', JSON.stringify(hist));
+  // Auto push to Google Sheets
+  try { pushPricesToCloud(); } catch(e) {}
+}
+
+function getBillNo() {
+  let n = parseInt(localStorage.getItem('mt_billno') || '100');
+  localStorage.setItem('mt_billno', n + 1);
+  return 'MT-' + String(n + 1).padStart(4, '0');
+}
+
+function getPrice(section, inch) {
+  const prices = getPrices();
+  const slabs = prices[section] || [];
+  for (let s of slabs) {
+    if (inch <= s.maxInch) return s.rate;
+  }
+  return slabs[slabs.length - 1]?.rate || 0;
+}
+
+function parseBelt(code) {
+  const m = code.match(/^([BC])(\d+)$/i);
+  if (!m) return null;
+  return { section: m[1].toUpperCase(), inch: parseInt(m[2]) };
+}
+
+function beltValue(code, qty) {
+  const p = parseBelt(code);
+  if (!p) return 0;
+  return getPrice(p.section, p.inch) * p.inch * qty;
+}
+
+// =============== UI ===============
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'stock') renderStockTable();
+  if (id === 'prices') renderPriceCards();
+  if (id === 'report') generateReport();
+  if (id === 'billing') renderBillItems();
+}
+
+function toast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--green)';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2800);
+}
+
+// =============== DASHBOARD ===============
+function renderDashboard() {
+  const data = getData();
+  const keys = Object.keys(data);
+  const total = keys.length;
+  const lowItems = keys.filter(k => data[k] < LOW_LIMIT);
+  const totalQty = keys.reduce((s, k) => s + data[k], 0);
+  const totalVal = keys.reduce((s, k) => s + beltValue(k, data[k]), 0);
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card gold"><div class="label">Total Belt Types</div><div class="value">${total}</div></div>
+    <div class="stat-card ok"><div class="label">Total Qty in Stock</div><div class="value">${totalQty}</div></div>
+    <div class="stat-card ${lowItems.length > 0 ? 'low' : 'ok'}"><div class="label">Low Stock Alerts</div><div class="value">${lowItems.length}</div></div>
+    <div class="stat-card gold"><div class="label">Stock Value (₹)</div><div class="value">₹${totalVal.toFixed(0)}</div></div>
+  `;
+
+  const alertDiv = document.getElementById('low-alerts');
+  if (lowItems.length > 0) {
+    alertDiv.innerHTML = `<div class="alert"><span class="alert-icon">⚠️</span><div><b>Low Stock Alert!</b> Yeh belts ${LOW_LIMIT} se neeche hain: <b>${lowItems.join(', ')}</b> — Order karo jaldi!</div></div>`;
+  } else {
+    alertDiv.innerHTML = '';
+  }
+
+  const tbody = document.getElementById('dash-table');
+  tbody.innerHTML = keys.length === 0 ? '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Abhi koi stock nahi — Stock tab se add karo</td></tr>' : '';
+  keys.sort().forEach(code => {
+    const p = parseBelt(code);
+    const qty = data[code];
+    const isLow = qty < LOW_LIMIT;
+    const val = beltValue(code, qty);
+    tbody.innerHTML += `<tr>
+      <td><b>${code}</b></td>
+      <td><span class="badge badge-${p.section}">${p.section} Section</span></td>
+      <td>${p.inch}"</td>
+      <td>${qty}</td>
+      <td><span class="badge ${isLow ? 'badge-low' : 'badge-ok'}">${isLow ? '⚠️ Low' : '✅ OK'}</span></td>
+      <td>₹${val.toFixed(2)}</td>
+    </tr>`;
+  });
+}
+
+// =============== STOCK ===============
+function addStock() {
+  const sec = document.getElementById('s-section').value;
+  const size = parseInt(document.getElementById('s-size').value);
+  const qty = parseInt(document.getElementById('s-qty').value);
+  if (!size || !qty || qty < 1) { toast('Size aur quantity sahi bharo!', 'var(--red)'); return; }
+  const code = sec + size;
+  const data = getData();
+  data[code] = (data[code] || 0) + qty;
+  saveData(data);
+  toast(`✅ ${code} mein ${qty} belt add hua. Ab total: ${data[code]}`);
+  document.getElementById('s-size').value = '';
+  document.getElementById('s-qty').value = '';
+}
+
+function setStock() {
+  const sec = document.getElementById('s-section').value;
+  const size = parseInt(document.getElementById('s-size').value);
+  const qty = parseInt(document.getElementById('s-qty').value);
+  if (!size || isNaN(qty) || qty < 0) { toast('Sahi values bharo!', 'var(--red)'); return; }
+  const code = sec + size;
+  const data = getData();
+  data[code] = qty;
+  saveData(data);
+  toast(`✅ ${code} ka stock set kiya: ${qty}`);
+  document.getElementById('s-size').value = '';
+  document.getElementById('s-qty').value = '';
+}
+
+function deductStock() {
+  const code = document.getElementById('d-code').value.trim().toUpperCase();
+  const qty = parseInt(document.getElementById('d-qty').value);
+  if (!code || !qty) { toast('Code aur quantity bharo!', 'var(--red)'); return; }
+  const data = getData();
+  if (data[code] === undefined) { toast(`${code} stock mein nahi hai!`, 'var(--red)'); return; }
+  if (data[code] < qty) { toast(`Sirf ${data[code]} belt hai, ${qty} deduct nahi ho sakta!`, 'var(--red)'); return; }
+  data[code] -= qty;
+  saveData(data);
+  toast(`✅ ${code} se ${qty} deduct hua. Baaki: ${data[code]}`);
+  document.getElementById('d-code').value = '';
+  document.getElementById('d-qty').value = '';
+}
+
+function deleteStock(code) {
+  if (!confirm(`${code} ko stock se hatao?`)) return;
+  const data = getData();
+  delete data[code];
+  saveData(data);
+  renderStockTable();
+  toast(`${code} hata diya gaya`, 'var(--low)');
+}
+
+function renderStockTable() {
+  const data = getData();
+  const search = (document.getElementById('search-input')?.value || '').toUpperCase();
+  const filterSec = document.getElementById('filter-section')?.value || '';
+  let keys = Object.keys(data).sort();
+  if (search) keys = keys.filter(k => k.includes(search));
+  if (filterSec) keys = keys.filter(k => k.startsWith(filterSec));
+  const tbody = document.getElementById('stock-table');
+  tbody.innerHTML = keys.length === 0 ? '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);">Koi belt nahi mili</td></tr>' : '';
+  keys.forEach(code => {
+    const p = parseBelt(code);
+    const qty = data[code];
+    const isLow = qty < LOW_LIMIT;
+    tbody.innerHTML += `<tr>
+      <td><b>${code}</b></td>
+      <td><span class="badge badge-${p.section}">${p.section}</span></td>
+      <td>${p.inch}"</td>
+      <td><b>${qty}</b></td>
+      <td><span class="badge ${isLow ? 'badge-low' : 'badge-ok'}">${isLow ? '⚠️ Low' : '✅ OK'}</span></td>
+      <td><button class="btn btn-danger" style="padding:6px 12px;font-size:11px;" onclick="deleteStock('${code}')">Delete</button></td>
+    </tr>`;
+  });
+}
+
+// =============== BILLING ===============
+let billItems = [{ code: '', qty: 1 }];
+
+function renderBillItems() {
+  const container = document.getElementById('bill-items');
+  // Build full HTML first, set once — prevents keyboard dismissal
+  let html = '';
+  billItems.forEach((item, i) => {
+    const p = item.code ? parseBelt(item.code) : null;
+    const rate = p ? getPrice(p.section, p.inch) : 0;
+    const subtotal = p ? (rate * p.inch * item.qty).toFixed(2) : '0.00';
+    html += `
+      <div class="bill-item-row" id="brow-${i}">
+        <div>
+          ${i === 0 ? '<label>Belt Code</label>' : ''}
+          <input type="text" value="${item.code}" placeholder="B132"
+            onchange="billItems[${i}].code=this.value.toUpperCase();this.value=this.value.toUpperCase();recalcBillRow(${i})"/>
+        </div>
+        <div>
+          ${i === 0 ? '<label>Qty</label>' : ''}
+          <input type="number" value="${item.qty}" min="1"
+            oninput="billItems[${i}].qty=+this.value||1;recalcBillRow(${i})"/>
+        </div>
+        <div>
+          ${i === 0 ? '<label>Subtotal</label>' : ''}
+          <input readonly id="bsubtotal-${i}" value="₹${subtotal}" style="color:var(--accent);font-weight:600;"/>
+        </div>
+        <div>
+          ${i === 0 ? '<label>&nbsp;</label>' : ''}
+          <button class="btn btn-danger" style="padding:8px 10px;" onclick="removeBillItem(${i})">✕</button>
+        </div>
+      </div>`;
+  });
+  container.innerHTML = html;
+  updateBillTotal();
+}
+
+function recalcBillRow(i) {
+  const item = billItems[i];
+  const p = item.code ? parseBelt(item.code) : null;
+  const rate = p ? getPrice(p.section, p.inch) : 0;
+  const subtotal = p ? (rate * p.inch * item.qty).toFixed(2) : '0.00';
+  const el = document.getElementById('bsubtotal-' + i);
+  if (el) el.value = '₹' + subtotal;
+  updateBillTotal();
+}
+
+function updateBillItem(i, field, val) {
+  billItems[i][field] = val;
+  renderBillItems();
+}
+
+function addBillItem() {
+  billItems.push({ code: '', qty: 1 });
+  renderBillItems();
+}
+
+function removeBillItem(i) {
+  billItems.splice(i, 1);
+  if (billItems.length === 0) billItems = [{ code: '', qty: 1 }];
+  renderBillItems();
+}
+
+function updateBillTotal() {
+  let total = 0;
+  billItems.forEach(item => {
+    const p = item.code ? parseBelt(item.code) : null;
+    if (p) total += getPrice(p.section, p.inch) * p.inch * item.qty;
+  });
+  document.getElementById('bill-total-val').textContent = '₹' + total.toFixed(2);
+}
+
+let pendingBillItems = [];
+
+function generateBill() {
+  const cust = document.getElementById('cust-name').value.trim() || 'Walk-in Customer';
+  const validItems = billItems.filter(item => parseBelt(item.code) && item.qty > 0);
+  if (validItems.length === 0) { toast('Koi valid belt nahi add kiya!', 'var(--red)'); return; }
+
+  const billNo = document.getElementById('bill-no').value || getBillNo();
+  document.getElementById('bill-no').value = billNo;
+
+  let rows = '';
+  let total = 0;
+  validItems.forEach(item => {
+    const p = parseBelt(item.code);
+    const rate = getPrice(p.section, p.inch);
+    const subtotal = rate * p.inch * item.qty;
+    total += subtotal;
+    rows += `<tr>
+      <td>${item.code}</td>
+      <td>${p.section} Section, ${p.inch}"</td>
+      <td>${item.qty}</td>
+      <td>₹${subtotal.toFixed(2)}</td>
+    </tr>`;
+  });
+
+  const date = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+
+  document.getElementById('bill-preview').innerHTML = `
+    <div class="print-bill" id="printable-bill">
+      <div class="pb-header">
+        <div class="pb-logo">MT</div>
+        <div>
+          <h2>Musaddique Traders</h2>
+          <div class="pb-sub">Belt Stock Manager</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:14px;font-size:12px;">
+        <div><b>Customer:</b> ${cust}</div>
+        <div><b>Bill No:</b> ${billNo}<br/><b>Date:</b> ${date}</div>
+      </div>
+      <table>
+        <thead><tr><th>Code</th><th>Description</th><th>Qty</th><th>Amount</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="pb-total">Grand Total: ₹${total.toFixed(2)}</div>
+      <div style="margin-top:16px;font-size:11px;color:#888;text-align:center;">Thank you for your business! — Musaddique Traders</div>
+    </div>
+  `;
+
+  pendingBillItems = validItems;
+  document.getElementById('bill-modal').classList.remove('hidden');
+}
+
+function confirmBillDeduct() {
+  const data = getData();
+  let errors = [];
+  pendingBillItems.forEach(item => {
+    const code = item.code.toUpperCase();
+    if ((data[code] || 0) < item.qty) {
+      errors.push(`${code}: sirf ${data[code] || 0} hai`);
+    }
+  });
+  if (errors.length > 0) {
+    toast('Stock kam hai: ' + errors.join(', '), 'var(--red)');
+    return;
+  }
+  pendingBillItems.forEach(item => {
+    const code = item.code.toUpperCase();
+    data[code] = (data[code] || 0) - item.qty;
+  });
+  saveData(data);
+  // Stock deducted — show success but keep modal open so user can save image
+  document.getElementById('confirm-deduct-btn').textContent = '✅ Stock Deducted!';
+  document.getElementById('confirm-deduct-btn').disabled = true;
+  document.getElementById('confirm-deduct-btn').style.background = '#16a34a';
+  toast('✅ Stock update ho gaya! Ab image save karo ya print karo.');
+  // Save bill to Google Sheets
+  try {
+    const cust = document.getElementById('cust-name').value.trim() || 'Walk-in Customer';
+    const billNo = document.getElementById('bill-no').value || '';
+    const total = pendingBillItems.reduce((s, item) => {
+      const p = parseBelt(item.code);
+      return s + (p ? getPrice(p.section, p.inch) * p.inch * item.qty : 0);
+    }, 0);
+    const itemsStr = pendingBillItems.map(i => i.code + 'x' + i.qty).join(', ');
+    saveBillToCloud({
+      billNo: billNo,
+      date: new Date().toLocaleDateString('en-IN'),
+      customer: cust,
+      items: itemsStr,
+      total: total.toFixed(2)
+    });
+  } catch(e) {}
+}
+
+function saveBillAsImage() {
+  const billEl = document.getElementById('printable-bill');
+  if (!billEl) { toast('Pehle bill generate karo!', 'var(--red)'); return; }
+  const btn = document.getElementById('save-img-btn');
+  btn.textContent = '⏳ Saving...';
+  btn.disabled = true;
+  html2canvas(billEl, {
+    backgroundColor: '#ffffff',
+    scale: 3,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    const billNo = document.getElementById('bill-no').value || 'bill';
+    link.download = `MT-Bill-${billNo}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = '🖼️ Save as Image';
+    btn.disabled = false;
+    toast('✅ Bill image download ho gayi!');
+  }).catch(err => {
+    btn.textContent = '🖼️ Save as Image';
+    btn.disabled = false;
+    toast('Image save failed, print try karo', 'var(--red)');
+  });
+}
+
+function printBill() {
+  const content = document.getElementById('printable-bill').outerHTML;
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>Bill</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+    <style>body{font-family:Inter,sans-serif;padding:20px;} table{width:100%;border-collapse:collapse;} th{background:#f3f4f6;padding:8px;text-align:left;} td{padding:8px;border-bottom:1px solid #e5e7eb;} .pb-logo{width:46px;height:46px;background:linear-gradient(135deg,#e8a020,#c0760f);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:Syne,sans-serif;font-weight:800;font-size:17px;color:#000;} .pb-header{display:flex;align-items:center;gap:14px;border-bottom:2px solid #e8a020;padding-bottom:14px;margin-bottom:16px;} h2{color:#e8a020;font-size:18px;} .pb-total{text-align:right;margin-top:14px;font-size:16px;font-weight:700;color:#e8a020;}</style>
+    </head><body>${content}</body></html>`);
+  w.document.close();
+  w.print();
+}
+
+function closeBillModal() {
+  document.getElementById('bill-modal').classList.add('hidden');
+}
+
+function closeBillAndClear() {
+  // Reset confirm button state
+  const btn = document.getElementById('confirm-deduct-btn');
+  if (btn) {
+    btn.textContent = '✅ Confirm & Deduct Stock';
+    btn.disabled = false;
+    btn.style.background = '';
+  }
+  document.getElementById('bill-modal').classList.add('hidden');
+  clearBill();
+}
+
+function clearBill() {
+  billItems = [{ code: '', qty: 1 }];
+  document.getElementById('cust-name').value = '';
+  document.getElementById('bill-no').value = '';
+  renderBillItems();
+}
+
+// =============== PRICES ===============
+function renderPriceCards() {
+  const prices = getPrices();
+  const container = document.getElementById('price-cards');
+
+  // Build HTML with unique IDs
+  let html = '';
+  ['B', 'C'].forEach(sec => {
+    const slabs = prices[sec];
+    let rows = slabs.map((s, i) => `
+      <div class="price-row">
+        <span class="pr-label">${s.label}</span>
+        <input
+          class="pr-input"
+          type="number"
+          step="0.01"
+          min="0.01"
+          value="${s.rate}"
+          id="price-${sec}-${i}"
+          placeholder="0.00"
+        />
+        <span class="pr-unit">₹/inch</span>
+      </div>`).join('');
+    html += `
+      <div class="price-card">
+        <h3><span class="badge badge-${sec}" style="margin-right:8px;">${sec}</span>${sec} Section Prices</h3>
+        ${rows}
+      </div>`;
+  });
+  container.innerHTML = html;
+
+  renderPriceHistory();
+}
+
+function previewPrice(sec, i, val) {
+  // just live feedback — actual save on button click
+}
+
+function savePrices() {
+  const prices = getPrices();
+  let anyError = false;
+
+  ['B', 'C'].forEach(sec => {
+    prices[sec].forEach((s, i) => {
+      const el = document.getElementById(`price-${sec}-${i}`);
+      if (!el) { anyError = true; return; }
+      const val = parseFloat(el.value);
+      if (isNaN(val) || val <= 0) {
+        el.style.borderColor = 'var(--red)';
+        anyError = true;
+      } else {
+        el.style.borderColor = '';
+        prices[sec][i].rate = val;
+      }
+    });
+  });
+
+  if (anyError) {
+    toast('❌ Sahi price bharo — 0 ya blank nahi hona chahiye!', 'var(--red)');
+    return;
+  }
+
+  savePriceData(prices);
+  toast('✅ Prices save ho gayi! Naye bills mein naye prices lagenge.');
+  renderPriceHistory();
+}
+
+function renderPriceHistory() {
+  const hist = JSON.parse(localStorage.getItem('mt_price_hist') || '[]');
+  const histDiv = document.getElementById('price-history-list');
+  if (!histDiv) return;
+  if (hist.length === 0) {
+    histDiv.textContent = 'Koi price change history nahi hai abhi.';
+  } else {
+    histDiv.innerHTML = hist.slice(0, 5).map(h =>
+      `<div style="margin-bottom:8px;padding:8px;background:var(--bg);border-radius:6px;">
+        <b style="color:var(--text);">${h.date}</b><br/>
+        B: ${h.prices.B.map(s => s.label.split('(')[0].trim()+' = ₹'+s.rate).join(' | ')}<br/>
+        C: ${h.prices.C.map(s => s.label.split('(')[0].trim()+' = ₹'+s.rate).join(' | ')}
+      </div>`
+    ).join('');
+  }
+}
+
+// =============== WEEKLY REPORT ===============
+function generateReport() {
+  const data = getData();
+  const keys = Object.keys(data).sort();
+  const lowItems = keys.filter(k => data[k] < LOW_LIMIT);
+  const okItems = keys.filter(k => data[k] >= LOW_LIMIT);
+  const date = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+  let lowRows = lowItems.map(code => {
+    const p = parseBelt(code);
+    return `<tr>
+      <td><b>${code}</b></td>
+      <td>${p.section} Section</td>
+      <td>${p.inch}"</td>
+      <td style="color:var(--low);font-weight:700;">${data[code]}</td>
+      <td style="color:var(--accent);">ORDER KARO</td>
+    </tr>`;
+  }).join('');
+
+  let allRows = keys.map(code => {
+    const p = parseBelt(code);
+    const qty = data[code];
+    const isLow = qty < LOW_LIMIT;
+    const val = beltValue(code, qty);
+    return `<tr>
+      <td><b>${code}</b></td>
+      <td>${p.section}</td>
+      <td>${qty}</td>
+      <td>₹${val.toFixed(2)}</td>
+      <td><span class="badge ${isLow ? 'badge-low' : 'badge-ok'}">${isLow ? '⚠️ Low' : '✅ OK'}</span></td>
+    </tr>`;
+  }).join('');
+
+  const totalVal = keys.reduce((s, k) => s + beltValue(k, data[k]), 0);
+
+  document.getElementById('weekly-report-content').innerHTML = `
+    <div style="border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:16px;">
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;">📋 Weekly Stock Report</div>
+      <div style="font-size:12px;color:var(--muted);">Musaddique Traders — ${date}</div>
+    </div>
+
+    <div class="report-section">
+      <h3>⚠️ Order List (Low Stock — ${LOW_LIMIT} se neeche)</h3>
+      ${lowItems.length === 0
+        ? '<p style="color:var(--green);font-size:13px;">✅ Sab stock theek hai, order ki zaroorat nahi!</p>'
+        : `<div class="table-wrap"><table><thead><tr><th>Code</th><th>Section</th><th>Size</th><th>Qty</th><th>Action</th></tr></thead><tbody>${lowRows}</tbody></table></div>`
+      }
+    </div>
+
+    <div class="report-section">
+      <h3>📦 Full Stock Summary</h3>
+      <div class="table-wrap">
+        <table><thead><tr><th>Code</th><th>Section</th><th>Qty</th><th>Value</th><th>Status</th></tr></thead>
+        <tbody>${allRows || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted);">Koi stock nahi</td></tr>'}</tbody></table>
+      </div>
+    </div>
+
+    <div style="background:var(--bg);border:1px solid var(--accent);border-radius:10px;padding:14px;margin-top:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:12px;color:var(--muted);">Total Stock Value</div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);">₹${totalVal.toFixed(2)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--muted);">Low Stock Items</div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${lowItems.length > 0 ? 'var(--low)' : 'var(--green)'};">${lowItems.length}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// =============== GOOGLE SHEETS SYNC ===============
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzOLMxzM5xv_fjoWOTLTdCjkjF899Xf0d-tNIAAYgBT4pcOuh5zd1g4p2sgyRohsTs-/exec';
+
+async function sheetRequest(params) {
+  try {
+    const url = SHEET_URL + '?' + new URLSearchParams(params).toString();
+    const res = await fetch(url);
+    return await res.json();
+  } catch (e) {
+    console.error('Sheet error:', e);
+    return { error: e.toString() };
+  }
+}
+
+async function syncToCloud() {
+  const data = getData();
+  const prices = getPrices();
+  showSyncStatus('syncing');
+  try {
+    await sheetRequest({ action: 'setStock', data: JSON.stringify(data) });
+    await sheetRequest({ action: 'setPrices', data: JSON.stringify(prices) });
+    showSyncStatus('ok');
+    localStorage.setItem('last_sync', new Date().toLocaleTimeString('en-IN'));
+    updateSyncTime();
+  } catch(e) {
+    showSyncStatus('error');
+  }
+}
+
+async function syncFromCloud() {
+  showSyncStatus('syncing');
+  try {
+    const stockRes = await sheetRequest({ action: 'getStock' });
+    const pricesRes = await sheetRequest({ action: 'getPrices' });
+    if (stockRes.stock) {
+      saveData(stockRes.stock);
+    }
+    if (pricesRes.prices && pricesRes.prices.B && pricesRes.prices.C) {
+      savePriceData(pricesRes.prices);
+    }
+    showSyncStatus('ok');
+    localStorage.setItem('last_sync', new Date().toLocaleTimeString('en-IN'));
+    updateSyncTime();
+    toast('✅ Cloud se data sync ho gaya!');
+    renderDashboard();
+  } catch(e) {
+    showSyncStatus('error');
+    toast('❌ Sync failed — internet check karo', 'var(--red)');
+  }
+}
+
+async function saveBillToCloud(billData) {
+  await sheetRequest({ action: 'saveBill', data: JSON.stringify(billData) });
+}
+
+function showSyncStatus(status) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  if (status === 'syncing') {
+    el.innerHTML = '🔄 Syncing...';
+    el.style.color = 'var(--accent)';
+  } else if (status === 'ok') {
+    el.innerHTML = '✅ Synced';
+    el.style.color = 'var(--green)';
+  } else {
+    el.innerHTML = '❌ Sync Error';
+    el.style.color = 'var(--red)';
+  }
+}
+
+function updateSyncTime() {
+  const t = localStorage.getItem('last_sync');
+  const el = document.getElementById('sync-time');
+  if (el && t) el.textContent = 'Last sync: ' + t;
+}
+
+// =============== GOOGLE SHEETS SYNC ===============
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzOLMxzM5xv_fjoWOTLTdCjkjF899Xf0d-tNIAAYgBT4pcOuh5zd1g4p2sgyRohsTs-/exec';
+let syncStatus = 'idle'; // idle, syncing, error
+
+function showSyncStatus(msg, color) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = color || 'var(--muted)';
+}
+
+async function gsRequest(params) {
+  const url = new URL(GS_URL);
+  Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+  const res = await fetch(url.toString());
+  return await res.json();
+}
+
+// Pull stock from Google Sheets → local
+async function syncFromCloud() {
+  try {
+    showSyncStatus('☁️ Syncing...', 'var(--accent)');
+    syncStatus = 'syncing';
+
+    // Get stock
+    const stockRes = await gsRequest({ action: 'getStock' });
+    if (stockRes.stock) {
+      saveData(stockRes.stock);
+    }
+
+    // Get prices
+    const priceRes = await gsRequest({ action: 'getPrices' });
+    if (priceRes.prices && priceRes.prices.B && priceRes.prices.C) {
+      savePriceData(priceRes.prices);
+    }
+
+    syncStatus = 'idle';
+    showSyncStatus('✅ Synced ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}), 'var(--green)');
+    renderDashboard();
+    renderBillItems();
+    if (document.getElementById('tab-stock').classList.contains('active')) renderStockTable();
+    if (document.getElementById('tab-prices').classList.contains('active')) renderPriceCards();
+  } catch(e) {
+    syncStatus = 'error';
+    showSyncStatus('❌ Sync failed — offline mode', 'var(--red)');
+  }
+}
+
+// Push stock to Google Sheets
+async function pushStockToCloud() {
+  try {
+    showSyncStatus('☁️ Saving...', 'var(--accent)');
+    const data = getData();
+    await gsRequest({ action: 'setStock', data: JSON.stringify(data) });
+    showSyncStatus('✅ Saved ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}), 'var(--green)');
+  } catch(e) {
+    showSyncStatus('❌ Save failed', 'var(--red)');
+  }
+}
+
+// Push prices to Google Sheets
+async function pushPricesToCloud() {
+  try {
+    const prices = getPrices();
+    await gsRequest({ action: 'setPrices', data: JSON.stringify(prices) });
+  } catch(e) {
+    console.log('Price sync failed:', e);
+  }
+}
+
+// Save bill to Google Sheets
+async function saveBillToCloud(billData) {
+  try {
+    await gsRequest({ action: 'saveBill', data: JSON.stringify(billData) });
+  } catch(e) {
+    console.log('Bill save failed:', e);
+  }
+}
+
+// Override saveData to auto-push
+const _origSaveData = saveData;
+function saveDataAndSync(d) {
+  localStorage.setItem('mt_stock', JSON.stringify(d));
+  pushStockToCloud();
+}
+
+// =============== GOOGLE SHEETS SYNC ===============
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzOLMxzM5xv_fjoWOTLTdCjkjF899Xf0d-tNIAAYgBT4pcOuh5zd1g4p2sgyRohsTs-/exec';
+
+async function gsRequest(params) {
+  const url = new URL(GS_URL);
+  Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
+  const res = await fetch(url.toString());
+  return await res.json();
+}
+
+// Load stock from Google Sheets
+async function syncStockFromCloud() {
+  try {
+    showSyncStatus('⏳ Sync ho raha hai...');
+    const res = await gsRequest({ action: 'getStock' });
+    if (res.stock) {
+      saveData(res.stock);
+      showSyncStatus('✅ Synced!', true);
+      return true;
+    }
+  } catch(e) {
+    showSyncStatus('⚠️ Offline mode', false, true);
+  }
+  return false;
+}
+
+// Save stock to Google Sheets
+async function syncStockToCloud() {
+  try {
+    const data = getData();
+    const url = GS_URL + '?action=setStock&data=' + encodeURIComponent(JSON.stringify(data));
+    await fetch(url);
+  } catch(e) {
+    console.log('Cloud sync failed, data saved locally');
+  }
+}
+
+// Load prices from cloud
+async function syncPricesFromCloud() {
+  try {
+    const res = await gsRequest({ action: 'getPrices' });
+    if (res.prices && res.prices.B && res.prices.C) {
+      savePriceData(res.prices);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+// Save prices to cloud
+async function syncPricesToCloud() {
+  try {
+    const prices = getPrices();
+    const url = GS_URL + '?action=setPrices&data=' + encodeURIComponent(JSON.stringify(prices));
+    await fetch(url);
+  } catch(e) {}
+}
+
+// Save bill to cloud
+async function saveBillToCloud(billData) {
+  try {
+    const url = GS_URL + '?action=saveBill&data=' + encodeURIComponent(JSON.stringify(billData));
+    await fetch(url);
+  } catch(e) {}
+}
+
+function showSyncStatus(msg, success, warn) {
+  let el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = success ? 'var(--green)' : warn ? 'var(--accent)' : 'var(--muted)';
+}
+
+// Override saveData to also sync to cloud
+const _origSaveData = saveData;
+function saveData(d) {
+  localStorage.setItem('mt_stock', JSON.stringify(d));
+  // Sync to cloud in background
+  setTimeout(() => syncStockToCloud(), 300);
+}
+
+// Override savePriceData to also sync prices
+const _origSavePriceData = savePriceData;
+function savePriceData(p) {
+  localStorage.setItem('mt_prices', JSON.stringify(p));
+  let hist = JSON.parse(localStorage.getItem('mt_price_hist') || '[]');
+  hist.unshift({ date: new Date().toLocaleString('en-IN'), prices: JSON.parse(JSON.stringify(p)) });
+  hist = hist.slice(0, 10);
+  localStorage.setItem('mt_price_hist', JSON.stringify(hist));
+  setTimeout(() => syncPricesToCloud(), 300);
+}
+
+// =============== INIT ===============
+function init() {
+  const now = new Date();
+  document.getElementById('hdate').innerHTML = now.toLocaleDateString('en-IN', { weekday:'short', day:'2-digit', month:'short', year:'numeric' }) + '<br/>' + now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  renderDashboard();
+  renderBillItems();
+  // Load from cloud on start
+  syncPricesFromCloud().then(() => {
+    syncStockFromCloud().then(() => {
+      renderDashboard();
+      renderStockTable();
+      renderPriceCards();
+    });
+  });
+  // Auto sync every 60 seconds
+  setInterval(function() {
+    syncStockFromCloud().then(() => {
+      renderDashboard();
+      renderStockTable();
+    });
+  }, 60000);
+}
+
+init();
+
+// Manual sync button
+async function manualSync() {
+  showSyncStatus('⏳ Sync ho raha hai...');
+  await syncPricesFromCloud();
+  const ok = await syncStockFromCloud();
+  if (ok) {
+    renderDashboard();
+    renderStockTable();
+    renderPriceCards();
+    toast('✅ Sab devices se data sync ho gaya!');
+  } else {
+    toast('⚠️ Internet check karo!', 'var(--accent)');
+  }
+}
+
+// =============== PWA SERVICE WORKER ===============
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(e => console.log('SW error:', e));
+  });
+}
+
+// =============== PWA INSTALL PROMPT ===============
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-btn').style.display = 'flex';
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-btn').style.display = 'none';
+  deferredPrompt = null;
+});
+
+function installApp() {
+  if (!deferredPrompt) {
+    toast('Pehle se install hai ya browser support nahi karta!', 'var(--accent)');
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') toast('✅ App install ho raha hai!');
+    deferredPrompt = null;
+    document.getElementById('install-btn').style.display = 'none';
+  });
+}
+</script>
+</body>
+</html>
