@@ -475,11 +475,17 @@
       <p>Belt Stock Manager</p>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
     <div class="header-date" id="hdate"></div>
+    <span id="sync-status" style="font-size:11px;color:var(--muted);">☁️ Connecting...</span>
+    <button onclick="syncFromCloud()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;">🔄 Sync</button>
     <button id="install-btn" onclick="installApp()" style="display:none;align-items:center;gap:6px;background:var(--accent);color:#000;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
       📲 Install App
     </button>
+    <button onclick="manualSync()" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+      🔄 Sync
+    </button>
+    <span id="sync-status" style="font-size:11px;color:var(--muted);white-space:nowrap;"></span>
   </div>
 </header>
 
@@ -688,6 +694,8 @@ function getData() {
 }
 function saveData(d) {
   localStorage.setItem('mt_stock', JSON.stringify(d));
+  // Auto push to Google Sheets
+  try { pushStockToCloud(); } catch(e) {}
 }
 
 function getPrices() {
@@ -704,6 +712,8 @@ function savePriceData(p) {
   hist.unshift({ date: new Date().toLocaleString('en-IN'), prices: JSON.parse(JSON.stringify(p)) });
   hist = hist.slice(0, 10);
   localStorage.setItem('mt_price_hist', JSON.stringify(hist));
+  // Auto push to Google Sheets
+  try { pushPricesToCloud(); } catch(e) {}
 }
 
 function getBillNo() {
@@ -1019,6 +1029,23 @@ function confirmBillDeduct() {
   document.getElementById('confirm-deduct-btn').disabled = true;
   document.getElementById('confirm-deduct-btn').style.background = '#16a34a';
   toast('✅ Stock update ho gaya! Ab image save karo ya print karo.');
+  // Save bill to Google Sheets
+  try {
+    const cust = document.getElementById('cust-name').value.trim() || 'Walk-in Customer';
+    const billNo = document.getElementById('bill-no').value || '';
+    const total = pendingBillItems.reduce((s, item) => {
+      const p = parseBelt(item.code);
+      return s + (p ? getPrice(p.section, p.inch) * p.inch * item.qty : 0);
+    }, 0);
+    const itemsStr = pendingBillItems.map(i => i.code + 'x' + i.qty).join(', ');
+    saveBillToCloud({
+      billNo: billNo,
+      date: new Date().toLocaleDateString('en-IN'),
+      customer: cust,
+      items: itemsStr,
+      total: total.toFixed(2)
+    });
+  } catch(e) {}
 }
 
 function saveBillAsImage() {
@@ -1238,15 +1265,299 @@ function generateReport() {
   `;
 }
 
+// =============== GOOGLE SHEETS SYNC ===============
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzOLMxzM5xv_fjoWOTLTdCjkjF899Xf0d-tNIAAYgBT4pcOuh5zd1g4p2sgyRohsTs-/exec';
+
+async function sheetRequest(params) {
+  try {
+    const url = SHEET_URL + '?' + new URLSearchParams(params).toString();
+    const res = await fetch(url);
+    return await res.json();
+  } catch (e) {
+    console.error('Sheet error:', e);
+    return { error: e.toString() };
+  }
+}
+
+async function syncToCloud() {
+  const data = getData();
+  const prices = getPrices();
+  showSyncStatus('syncing');
+  try {
+    await sheetRequest({ action: 'setStock', data: JSON.stringify(data) });
+    await sheetRequest({ action: 'setPrices', data: JSON.stringify(prices) });
+    showSyncStatus('ok');
+    localStorage.setItem('last_sync', new Date().toLocaleTimeString('en-IN'));
+    updateSyncTime();
+  } catch(e) {
+    showSyncStatus('error');
+  }
+}
+
+async function syncFromCloud() {
+  showSyncStatus('syncing');
+  try {
+    const stockRes = await sheetRequest({ action: 'getStock' });
+    const pricesRes = await sheetRequest({ action: 'getPrices' });
+    if (stockRes.stock) {
+      saveData(stockRes.stock);
+    }
+    if (pricesRes.prices && pricesRes.prices.B && pricesRes.prices.C) {
+      savePriceData(pricesRes.prices);
+    }
+    showSyncStatus('ok');
+    localStorage.setItem('last_sync', new Date().toLocaleTimeString('en-IN'));
+    updateSyncTime();
+    toast('✅ Cloud se data sync ho gaya!');
+    renderDashboard();
+  } catch(e) {
+    showSyncStatus('error');
+    toast('❌ Sync failed — internet check karo', 'var(--red)');
+  }
+}
+
+async function saveBillToCloud(billData) {
+  await sheetRequest({ action: 'saveBill', data: JSON.stringify(billData) });
+}
+
+function showSyncStatus(status) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  if (status === 'syncing') {
+    el.innerHTML = '🔄 Syncing...';
+    el.style.color = 'var(--accent)';
+  } else if (status === 'ok') {
+    el.innerHTML = '✅ Synced';
+    el.style.color = 'var(--green)';
+  } else {
+    el.innerHTML = '❌ Sync Error';
+    el.style.color = 'var(--red)';
+  }
+}
+
+function updateSyncTime() {
+  const t = localStorage.getItem('last_sync');
+  const el = document.getElementById('sync-time');
+  if (el && t) el.textContent = 'Last sync: ' + t;
+}
+
+// =============== GOOGLE SHEETS SYNC ===============
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzOLMxzM5xv_fjoWOTLTdCjkjF899Xf0d-tNIAAYgBT4pcOuh5zd1g4p2sgyRohsTs-/exec';
+let syncStatus = 'idle'; // idle, syncing, error
+
+function showSyncStatus(msg, color) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = color || 'var(--muted)';
+}
+
+async function gsRequest(params) {
+  const url = new URL(GS_URL);
+  Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+  const res = await fetch(url.toString());
+  return await res.json();
+}
+
+// Pull stock from Google Sheets → local
+async function syncFromCloud() {
+  try {
+    showSyncStatus('☁️ Syncing...', 'var(--accent)');
+    syncStatus = 'syncing';
+
+    // Get stock
+    const stockRes = await gsRequest({ action: 'getStock' });
+    if (stockRes.stock) {
+      saveData(stockRes.stock);
+    }
+
+    // Get prices
+    const priceRes = await gsRequest({ action: 'getPrices' });
+    if (priceRes.prices && priceRes.prices.B && priceRes.prices.C) {
+      savePriceData(priceRes.prices);
+    }
+
+    syncStatus = 'idle';
+    showSyncStatus('✅ Synced ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}), 'var(--green)');
+    renderDashboard();
+    renderBillItems();
+    if (document.getElementById('tab-stock').classList.contains('active')) renderStockTable();
+    if (document.getElementById('tab-prices').classList.contains('active')) renderPriceCards();
+  } catch(e) {
+    syncStatus = 'error';
+    showSyncStatus('❌ Sync failed — offline mode', 'var(--red)');
+  }
+}
+
+// Push stock to Google Sheets
+async function pushStockToCloud() {
+  try {
+    showSyncStatus('☁️ Saving...', 'var(--accent)');
+    const data = getData();
+    await gsRequest({ action: 'setStock', data: JSON.stringify(data) });
+    showSyncStatus('✅ Saved ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}), 'var(--green)');
+  } catch(e) {
+    showSyncStatus('❌ Save failed', 'var(--red)');
+  }
+}
+
+// Push prices to Google Sheets
+async function pushPricesToCloud() {
+  try {
+    const prices = getPrices();
+    await gsRequest({ action: 'setPrices', data: JSON.stringify(prices) });
+  } catch(e) {
+    console.log('Price sync failed:', e);
+  }
+}
+
+// Save bill to Google Sheets
+async function saveBillToCloud(billData) {
+  try {
+    await gsRequest({ action: 'saveBill', data: JSON.stringify(billData) });
+  } catch(e) {
+    console.log('Bill save failed:', e);
+  }
+}
+
+// Override saveData to auto-push
+const _origSaveData = saveData;
+function saveDataAndSync(d) {
+  localStorage.setItem('mt_stock', JSON.stringify(d));
+  pushStockToCloud();
+}
+
+// =============== GOOGLE SHEETS SYNC ===============
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzOLMxzM5xv_fjoWOTLTdCjkjF899Xf0d-tNIAAYgBT4pcOuh5zd1g4p2sgyRohsTs-/exec';
+
+async function gsRequest(params) {
+  const url = new URL(GS_URL);
+  Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
+  const res = await fetch(url.toString());
+  return await res.json();
+}
+
+// Load stock from Google Sheets
+async function syncStockFromCloud() {
+  try {
+    showSyncStatus('⏳ Sync ho raha hai...');
+    const res = await gsRequest({ action: 'getStock' });
+    if (res.stock) {
+      saveData(res.stock);
+      showSyncStatus('✅ Synced!', true);
+      return true;
+    }
+  } catch(e) {
+    showSyncStatus('⚠️ Offline mode', false, true);
+  }
+  return false;
+}
+
+// Save stock to Google Sheets
+async function syncStockToCloud() {
+  try {
+    const data = getData();
+    const url = GS_URL + '?action=setStock&data=' + encodeURIComponent(JSON.stringify(data));
+    await fetch(url);
+  } catch(e) {
+    console.log('Cloud sync failed, data saved locally');
+  }
+}
+
+// Load prices from cloud
+async function syncPricesFromCloud() {
+  try {
+    const res = await gsRequest({ action: 'getPrices' });
+    if (res.prices && res.prices.B && res.prices.C) {
+      savePriceData(res.prices);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+// Save prices to cloud
+async function syncPricesToCloud() {
+  try {
+    const prices = getPrices();
+    const url = GS_URL + '?action=setPrices&data=' + encodeURIComponent(JSON.stringify(prices));
+    await fetch(url);
+  } catch(e) {}
+}
+
+// Save bill to cloud
+async function saveBillToCloud(billData) {
+  try {
+    const url = GS_URL + '?action=saveBill&data=' + encodeURIComponent(JSON.stringify(billData));
+    await fetch(url);
+  } catch(e) {}
+}
+
+function showSyncStatus(msg, success, warn) {
+  let el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = success ? 'var(--green)' : warn ? 'var(--accent)' : 'var(--muted)';
+}
+
+// Override saveData to also sync to cloud
+const _origSaveData = saveData;
+function saveData(d) {
+  localStorage.setItem('mt_stock', JSON.stringify(d));
+  // Sync to cloud in background
+  setTimeout(() => syncStockToCloud(), 300);
+}
+
+// Override savePriceData to also sync prices
+const _origSavePriceData = savePriceData;
+function savePriceData(p) {
+  localStorage.setItem('mt_prices', JSON.stringify(p));
+  let hist = JSON.parse(localStorage.getItem('mt_price_hist') || '[]');
+  hist.unshift({ date: new Date().toLocaleString('en-IN'), prices: JSON.parse(JSON.stringify(p)) });
+  hist = hist.slice(0, 10);
+  localStorage.setItem('mt_price_hist', JSON.stringify(hist));
+  setTimeout(() => syncPricesToCloud(), 300);
+}
+
 // =============== INIT ===============
 function init() {
   const now = new Date();
   document.getElementById('hdate').innerHTML = now.toLocaleDateString('en-IN', { weekday:'short', day:'2-digit', month:'short', year:'numeric' }) + '<br/>' + now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
   renderDashboard();
   renderBillItems();
+  // Load from cloud on start
+  syncPricesFromCloud().then(() => {
+    syncStockFromCloud().then(() => {
+      renderDashboard();
+      renderStockTable();
+      renderPriceCards();
+    });
+  });
+  // Auto sync every 60 seconds
+  setInterval(function() {
+    syncStockFromCloud().then(() => {
+      renderDashboard();
+      renderStockTable();
+    });
+  }, 60000);
 }
 
 init();
+
+// Manual sync button
+async function manualSync() {
+  showSyncStatus('⏳ Sync ho raha hai...');
+  await syncPricesFromCloud();
+  const ok = await syncStockFromCloud();
+  if (ok) {
+    renderDashboard();
+    renderStockTable();
+    renderPriceCards();
+    toast('✅ Sab devices se data sync ho gaya!');
+  } else {
+    toast('⚠️ Internet check karo!', 'var(--accent)');
+  }
+}
 
 // =============== PWA SERVICE WORKER ===============
 if ('serviceWorker' in navigator) {
