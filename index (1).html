@@ -475,17 +475,12 @@
       <p>Belt Stock Manager</p>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:8px;">
     <div class="header-date" id="hdate"></div>
-    <span id="sync-status" style="font-size:11px;color:var(--muted);">☁️ Connecting...</span>
-    <button onclick="syncFromCloud()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;">🔄 Sync</button>
-    <button id="install-btn" onclick="installApp()" style="display:none;align-items:center;gap:6px;background:var(--accent);color:#000;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
-      📲 Install App
-    </button>
-    <button onclick="manualSync()" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+    <button onclick="manualSync()" style="background:var(--accent);border:none;color:#000;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
       🔄 Sync
     </button>
-    <span id="sync-status" style="font-size:11px;color:var(--muted);white-space:nowrap;"></span>
+    <span id="sync-status" style="font-size:11px;color:var(--muted);"></span>
   </div>
 </header>
 
